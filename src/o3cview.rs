@@ -36,6 +36,7 @@ impl Viewer {
     }
 
     fn open_device(&mut self) -> bool {
+        self.hid.refresh_devices().unwrap();
         for x in self.hid.device_list() {
             if x.vendor_id() == SAYO_VENDOR_ID && x.usage_page() == API_V2_FAST_USAGE_PAGE {
                 if let Ok(device) = x.open_device(&self.hid) {
