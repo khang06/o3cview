@@ -1,0 +1,13 @@
+[package]
+name = "o3cview"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+hidapi = "2.6.3"
+sdl3 = { version = "0.14.3", features = [] }
+
+[profile.release]
+panic = "abort"
+lto = "fat"
+codegen-units = 1
