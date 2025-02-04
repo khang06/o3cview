@@ -1,0 +1,11 @@
+[package]
+name = "o3cview-core"
+version = "0.2.0"
+edition = "2024"
+
+[dependencies]
+hidapi = "2.6.3"
+
+[lib]
+name = "o3cview_core"
+crate-type = ["lib", "staticlib"]

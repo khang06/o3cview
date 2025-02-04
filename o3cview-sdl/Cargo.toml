@@ -1,0 +1,8 @@
+[package]
+name = "o3cview-sdl"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+o3cview-core = { path = "../o3cview-core" }
+sdl3 = "0.14.4"

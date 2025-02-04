@@ -1,8 +1,6 @@
-mod o3cview;
-
 use std::time::Duration;
 
-use o3cview::Viewer;
+use o3cview_core::{DISPLAY_HEIGHT, DISPLAY_WIDTH, Viewer};
 use sdl3::{
     event::Event,
     keyboard::Keycode,
@@ -15,7 +13,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let sdl_video = sdl.video()?;
 
     let window = sdl_video
-        .window("o3cview", o3cview::WIDTH as u32, o3cview::HEIGHT as u32)
+        .window("o3cview", DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32)
         .build()?;
     let mut canvas = window.into_canvas();
 
@@ -29,15 +27,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
     let mut tex = tex_creator.create_texture_streaming(
         PixelFormat::from_masks(mask),
-        o3cview::WIDTH as u32,
-        o3cview::HEIGHT as u32,
+        DISPLAY_WIDTH as u32,
+        DISPLAY_HEIGHT as u32,
     )?;
     unsafe {
         SDL_SetTextureScaleMode(tex.raw(), SDL_SCALEMODE_NEAREST);
     }
 
     let mut viewer = Viewer::new()?;
-    let mut fb = [0u8; o3cview::WIDTH * o3cview::HEIGHT * 2];
+    let mut fb = [0u8; DISPLAY_WIDTH * DISPLAY_HEIGHT * 2];
 
     let mut event_pump = sdl.event_pump()?;
     let mut scale = 1;
@@ -66,17 +64,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     } else {
                         scale += 1;
                     }
-                    canvas.window_mut().set_size(
-                        scale * o3cview::WIDTH as u32,
-                        scale * o3cview::HEIGHT as u32,
-                    )?;
+                    canvas
+                        .window_mut()
+                        .set_size(scale * DISPLAY_WIDTH as u32, scale * DISPLAY_HEIGHT as u32)?;
                 }
                 _ => {}
             }
         }
 
         viewer.get_frame(&mut fb);
-        tex.update(None, &fb, o3cview::WIDTH * 2)?;
+        tex.update(None, &fb, DISPLAY_WIDTH * 2)?;
         canvas.copy(&tex, None, None)?;
 
         canvas.present();

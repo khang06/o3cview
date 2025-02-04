@@ -49,10 +49,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b5aba8db14291edd000dfcc4d620c7ebfb122c613afb886ca8803fa4e128a20a"
 
 [[package]]
-name = "o3cview"
-version = "0.1.0"
+name = "o3cview-core"
+version = "0.2.0"
 dependencies = [
  "hidapi",
+]
+
+[[package]]
+name = "o3cview-sdl"
+version = "0.1.0"
+dependencies = [
+ "o3cview-core",
  "sdl3",
 ]
 
@@ -64,9 +71,9 @@ checksum = "953ec861398dccce10c670dfeaf3ec4911ca479e9c02154b3a215178c5f566f2"
 
 [[package]]
 name = "sdl3"
-version = "0.14.3"
+version = "0.14.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "41f43489df3f10ba4e6682ac57203f0f3e1f85e51936ccf5bf8b3276d585c42f"
+checksum = "23ff379e0fb2214d88f0802eda69642f4c547e088563b807bf2135753aac59c4"
 dependencies = [
  "bitflags",
  "lazy_static",

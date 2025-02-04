@@ -1,10 +1,13 @@
+mod ffi;
+
 use hidapi::{HidApi, HidDevice, HidError};
 
 const SAYO_VENDOR_ID: u16 = 0x8089;
 const API_V2_FAST_USAGE_PAGE: u16 = 0xFF12;
+const API_V2_FAST_REPORT_ID: u8 = 0x22;
 
-pub const WIDTH: usize = 160;
-pub const HEIGHT: usize = 80;
+pub const DISPLAY_WIDTH: usize = 160;
+pub const DISPLAY_HEIGHT: usize = 80;
 
 pub struct Viewer {
     hid: HidApi,
@@ -27,7 +30,7 @@ impl Viewer {
         ret.open_device();
 
         // TODO: Document what this stuff means
-        ret.req[0] = 0x22;
+        ret.req[0] = API_V2_FAST_REPORT_ID;
         ret.req[1] = 0x03;
         ret.req[4] = 0x08;
         ret.req[6] = 0x25;
@@ -49,7 +52,10 @@ impl Viewer {
         false
     }
 
-    fn try_read_frame(&mut self, fb: &mut [u8; WIDTH * HEIGHT * 2]) -> Result<(), HidError> {
+    fn try_read_frame(
+        &mut self,
+        fb: &mut [u8; DISPLAY_WIDTH * DISPLAY_HEIGHT * 2],
+    ) -> Result<(), HidError> {
         let device = self.device.as_mut().unwrap();
 
         for i in (0..fb.len()).step_by(1024 - 0xC) {
@@ -76,7 +82,7 @@ impl Viewer {
             for _ in 0..5 {
                 device.read_timeout(&mut self.res, 250)?;
 
-                if self.res[0] == 0x22 {
+                if self.res[0] == API_V2_FAST_REPORT_ID {
                     // Copy to framebuffer
                     x.copy_from_slice(&self.res[12..(12 + x.len())]);
                     continue 'outer;
@@ -89,7 +95,7 @@ impl Viewer {
         Ok(())
     }
 
-    pub fn get_frame(&mut self, fb: &mut [u8; WIDTH * HEIGHT * 2]) {
+    pub fn get_frame(&mut self, fb: &mut [u8; DISPLAY_WIDTH * DISPLAY_HEIGHT * 2]) {
         if self.device.is_none() && !self.open_device() {
             fb.clone_from(include_bytes!("../nodevice.bin"));
             return;
