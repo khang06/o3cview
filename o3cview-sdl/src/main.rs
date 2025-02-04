@@ -1,3 +1,5 @@
+#![windows_subsystem = "windows"]
+
 use std::time::Duration;
 
 use o3cview_core::{DISPLAY_HEIGHT, DISPLAY_WIDTH, Viewer};
