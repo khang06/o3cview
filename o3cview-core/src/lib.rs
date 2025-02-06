@@ -64,6 +64,7 @@ impl Viewer {
         let device = self.device.as_mut().unwrap();
 
         const CHUNK_SIZE: usize = 1024 - 0xC;
+        const CHUNK_COUNT: usize = (DISPLAY_WIDTH * DISPLAY_HEIGHT * 2).div_ceil(CHUNK_SIZE);
         for i in (0..fb.len()).step_by(CHUNK_SIZE) {
             // Clear checksum
             self.req[2] = 0;
@@ -84,18 +85,28 @@ impl Viewer {
         }
 
         // Get response
-        'outer: for (i, x) in fb.chunks_mut(CHUNK_SIZE).enumerate() {
-            for _ in 0..5 {
+        'outer: for _ in 0..CHUNK_COUNT {
+            for _ in 0..10 {
                 if device.read_timeout(&mut self.res, 4)? == 0 {
-                    // Probably a dropped packet somewhere
+                    // Last packet got dropped
                     return Ok(());
                 }
 
-                if self.res[0] == API_V2_FAST_REPORT_ID && u32::from_le_bytes(self.res[8..12].try_into().unwrap()) as usize == i * CHUNK_SIZE {
-                    // Copy to framebuffer
-                    x.copy_from_slice(&self.res[12..(12 + x.len())]);
-                    continue 'outer;
+                if self.res[0] != API_V2_FAST_REPORT_ID {
+                    // Unrelated packet, keep trying
+                    continue;
                 }
+
+                // Copy to framebuffer
+                let fb_len = fb.len();
+                let target = u32::from_le_bytes(self.res[8..12].try_into().unwrap()) as usize;
+                if target % CHUNK_SIZE != 0 || target >= fb_len {
+                    continue;
+                }
+
+                let chunk = &mut fb[target..(target + CHUNK_SIZE).min(fb_len)];
+                chunk.copy_from_slice(&self.res[12..(12 + chunk.len())]);
+                continue 'outer;
             }
 
             return Err(HidError::HidApiErrorEmpty);
